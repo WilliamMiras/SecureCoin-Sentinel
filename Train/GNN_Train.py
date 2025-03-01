@@ -35,4 +35,4 @@ for epoch in range(100):
     loss.backward()
     optimizer.step()
 
-torch.save(model.state_dict(), "GNN_ScamDetection.pth")
+torch.save(model.state_dict(), "./GNN_ScamDetection.pth")

@@ -1,0 +1,22 @@
+# PyTorch and related libraries
+torch==2.1.0
+torchvision==0.16.0
+torchaudio==2.1.0
+torch-geometric==2.4.0
+
+# Hugging Face Transformers for BERT
+transformers==4.36.0
+
+# Data Handling and Processing
+pandas==1.5.3
+scikit-learn==1.2.2
+
+# Additional dependencies
+numpy==1.23.5
+scipy==1.10.1
+
+# For GPU support
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# For PyTorch Geomentric dependencies
+pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-2.1.0+cu118.html

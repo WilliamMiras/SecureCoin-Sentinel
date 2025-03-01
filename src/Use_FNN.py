@@ -3,8 +3,7 @@ import torch.nn as nn
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
-
-# Defining the model structure (same as in the training script)
+# Define the same model structure
 class ScamDetectionFNN(nn.Module):
     def __init__(self, input_dim):
         super(ScamDetectionFNN, self).__init__()
@@ -20,61 +19,32 @@ class ScamDetectionFNN(nn.Module):
         x = self.sigmoid(self.layer3(x))
         return x
 
-
-# Loading the trained model
-input_dim = 4  # Assuming 4 features: Chain, Losses, Type, Root Causes
-model = ScamDetectionFNN(input_dim)
+# Load trained model
+model = ScamDetectionFNN(input_dim=4)  # Update input_dim if needed
 model.load_state_dict(torch.load("FNN_ScamDetection.pth"))
 model.eval()
 
-# Initialize preprocessing tools
-le = LabelEncoder()
-scaler = StandardScaler()
+# Function to predict scam probability
+def fnn_scam_prob(data_path, model):
+    df = pd.read_csv(data_path)
 
-# Load the original dataset to fit the LabelEncoder and StandardScaler
-df = pd.read_csv('scam_dataset.csv')
-le.fit(df['Chain'])
-le.fit(df['Type'])
-le.fit(df['Root Causes'])
-X = df[['Chain', 'Losses', 'Type', 'Root Causes']]
-X['Losses'] = X['Losses'].str.replace('$', '').str.replace(',', '').astype(float)
-scaler.fit(X)
+    # Preprocess data (same steps as training)
+    le = LabelEncoder()
+    df['Chain'] = le.fit_transform(df['Chain'])
+    df['Type'] = le.fit_transform(df['Type'])
+    df['Root Causes'] = le.fit_transform(df['Root Causes'])
 
+    X = df[['Chain', 'Losses', 'Type', 'Root Causes']]
+    X['Losses'] = X['Losses'].str.replace(r'[$,]', '', regex=True).astype(float)
 
-def fnn_scam_prob(coin_data, fnn_model):
-    """
-    :param coin_data: (dict) Dictionary containing coin data
-    :param fnn_model: (torch.nn.Module) Trained FNN model
-    :return: (float) Probability of being a scam
-    """
-    # Preprocess the input data
-    processed_data = {
-        'Chain': le.transform([coin_data['Chain']])[0],
-        'Losses': float(coin_data['Losses']),
-        'Type': le.transform([coin_data['Type']])[0],
-        'Root Causes': le.transform([coin_data['Root Causes']])[0]
-    }
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
 
-    input_data = pd.DataFrame([processed_data])
-    input_scaled = scaler.transform(input_data)
+    X_tensor = torch.FloatTensor(X_scaled)
 
-    # Convert to PyTorch tensor
-    input_tensor = torch.FloatTensor(input_scaled)
-
-    # Get prediction from trained model
+    # Get predictions
     with torch.no_grad():
-        prediction = fnn_model(input_tensor)
+        scam_probs = model(X_tensor).squeeze().numpy()  # Convert to NumPy for readability
 
-    return float(prediction[0][0])
-
-
-# Example usage
-example_coin = {
-    'Chain': 'ETH',
-    'Losses': 100000,
-    'Type': 'Combination',
-    'Root Causes': 'Combination'
-}
-
-scam_probability = fnn_scam_prob(example_coin, model)
-print(f"Probability of scam: {scam_probability:.4f}")
+    df['Scam Probability'] = scam_probs  # Append probability to the dataframe
+    return scam_probs

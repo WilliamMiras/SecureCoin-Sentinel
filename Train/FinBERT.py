@@ -89,5 +89,5 @@ for epoch in range(num_epochs):
         f"Epoch {epoch + 1}/{num_epochs}, Validation Loss: {val_loss / len(val_dataloader):.4f}, Accuracy: {val_accuracy:.4f}")
 
 # Save the fine-tuned model
-model.save_pretrained("./finbert_crypto_scam_detector")
-tokenizer.save_pretrained("./finbert_crypto_scam_detector")
+model.save_pretrained("./NLP_ScamDetection.pth")
+tokenizer.save_pretrained("./NLP_ScamDetection.pth")
