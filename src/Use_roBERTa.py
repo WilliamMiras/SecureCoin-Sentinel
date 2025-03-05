@@ -47,18 +47,3 @@ def predict_sentiment(text):
     confidence = probs.max()
 
     return sentiment, confidence
-
-
-# Example usage
-texts = [
-    "I absolutely loved this movie!",
-    "The service at the restaurant was terrible.",
-    "The weather today is just okay.",
-]
-
-for text in texts:
-    sentiment, confidence = predict_sentiment(text)
-    print(f"Text: {text}")
-    print(f"Sentiment: {sentiment}")
-    print(f"Confidence: {confidence:.2f}")
-    print()

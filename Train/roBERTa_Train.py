@@ -9,8 +9,18 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import RobertaTokenizer, RobertaForSequenceClassification, AdamW, get_linear_schedule_with_warmup
 from sklearn.model_selection import train_test_split
 
-# Load and preprocess the data
-df = pd.read_csv('sentiment_data.csv')
+# Check for GPU availability
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Using device: {device}")
+
+if device.type == 'cuda':
+    print(f"GPU Name: {torch.cuda.get_device_name(0)}")
+    print(f"GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
+else:
+    print("No GPU available. Using CPU.")
+
+# Load and preprocess data
+df = pd.read_csv('training_data_sentiment.csv')
 texts = df['text'].tolist()
 labels = df['label'].tolist()
 
@@ -18,7 +28,7 @@ labels = df['label'].tolist()
 train_texts, val_texts, train_labels, val_labels = train_test_split(texts, labels, test_size=0.2, random_state=42)
 
 
-# Create a custom dataset
+# Custom Dataset class
 class TextDataset(Dataset):
     def __init__(self, texts, labels, tokenizer, max_length):
         self.texts = texts
@@ -52,6 +62,8 @@ class TextDataset(Dataset):
 # Initialize tokenizer and model
 tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
 model = RobertaForSequenceClassification.from_pretrained('roberta-base', num_labels=len(set(labels)))
+model.to(device)
+print(f"Model is on: {next(model.parameters()).device}")
 
 # Create datasets and dataloaders
 train_dataset = TextDataset(train_texts, train_labels, tokenizer, max_length=128)
@@ -65,9 +77,6 @@ total_steps = len(train_dataloader) * 3  # 3 epochs
 scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=total_steps)
 
 # Training loop
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model.to(device)
-
 for epoch in range(3):
     model.train()
     for batch in train_dataloader:
@@ -95,4 +104,5 @@ for epoch in range(3):
     print(f"Epoch {epoch + 1}, Validation Loss: {val_loss / len(val_dataloader)}")
 
 # Save the fine-tuned model
-torch.save(model.state_dict(), "./roBERTa_fine_tuned.pth")
+torch.save(model.cpu().state_dict(), 'roBERTa_fine_tuned.pth')
+print("Training completed and model saved.")
