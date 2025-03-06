@@ -18,6 +18,7 @@ class ScamDetectionFNN(nn.Module):
         self.layer3 = nn.Linear(128, 1)
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
+        self.output_dim = 1 # For hybrid model compatibility
 
     def forward(self, x):
         x = self.relu(self.layer1(x))

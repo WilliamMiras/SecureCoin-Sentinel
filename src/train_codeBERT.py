@@ -1,3 +1,4 @@
+# Trains the standalone CodeBERT model and saves it.
 import torch
 from torch.utils.data import DataLoader, random_split
 from transformers import RobertaTokenizer, AdamW
@@ -44,5 +45,5 @@ for epoch in range(3):
         loop.set_postfix(loss=loss.item())
 
 # Save model
-model.save("../models/my_codebert_goodbad_model")
-tokenizer.save_pretrained("../models/my_codebert_goodbad_model")
+model.save("../models/codeBERT_smartContractAnalysis")
+tokenizer.save_pretrained("../models/codeBERT_smartContractAnalysis")

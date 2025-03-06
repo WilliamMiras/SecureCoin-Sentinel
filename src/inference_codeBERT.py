@@ -1,3 +1,5 @@
+# Runs standalone CodeBERT inference on new code.
+
 import torch
 from transformers import RobertaTokenizer
 from models.codebert import CodeBERTClassifier
